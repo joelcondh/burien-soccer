@@ -91,15 +91,15 @@ type Perfil = {
     nombre: string;
     estado: string;
     rol?: string | null;
-  };
-  
-  type Reserva = {
+};
+
+type Reserva = {
     id: number;
     user_id: string;
     nombre_jugador?: string | null;
     equipo: string;
     reservado_en: string;
-  };
+};
 
 function DashboardContent() {
     const [user, setUser] = useState<{ id: string } | null>(null);
@@ -193,35 +193,35 @@ function DashboardContent() {
 
     const handleReservar = async () => {
         if (!user || !perfil) return;
-    
+
         if (perfil.estado !== "activo") {
             setShowInactivoModal(true);
             return;
         }
-    
+
         const { data: reservaExistente } = await supabase
             .from("reservas")
             .select("*")
             .eq("user_id", user.id)
             .maybeSingle();
-    
+
         if (reservaExistente) return;
-    
+
         // 🚨 NUEVO -> Revisar cantidad total actual de reservas
         const totalReservas = reservas.length;
-    
+
         if (totalReservas === 12 || totalReservas === 24) {
             await redistribuirEquipos(); // redistribuye todos los jugadores actuales
             await getReservas(); // vuelve a cargar las reservas redistribuidas
         }
-    
+
         // ✅ Asignar equipo para el NUEVO jugador que está reservando
         const equipoAsignado = asignarEquipo(reservas);
-    
+
         const { error } = await supabase.from("reservas").insert([
             { user_id: user.id, equipo: equipoAsignado }
         ]);
-    
+
         if (!error) {
             await verificarMiReserva(user.id);
             await getReservas(); // ✅ Cargar de BD con nombre_jugador correcto
@@ -317,6 +317,30 @@ function DashboardContent() {
                     {miEquipo}
                 </b>
             </p>
+            {showInactivoModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-8 rounded shadow-lg max-w-sm w-full text-center">
+                        <h2 className="text-2xl mb-4 text-red-600 font-bold">No puedes reservar</h2>
+                        <p className="mb-6">Tu cuenta está inactiva. Por favor, solicita la activación para poder reservar tu lugar.</p>
+
+                        <a
+                            href="https://wa.me/1234567890?text=Hola,%20por%20favor%20activame%20para%20poder%20reservar%20en%20Burien%20Soccer"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600 block mb-4"
+                        >
+                            Contactar por WhatsApp
+                        </a>
+
+                        <button
+                            onClick={() => setShowInactivoModal(false)}
+                            className="text-gray-500 underline"
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

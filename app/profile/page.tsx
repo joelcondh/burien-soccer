@@ -2,17 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { RequireAuth } from "@/lib/require-auth";
-
-type Perfil = {
-  id: string;
-  user_id: string;
-  nombre: string;
-  ciudad?: string | null;
-  telefono?: string | null;
-};
 
 export default function ProfilePage() {
   return (
@@ -23,8 +16,9 @@ export default function ProfilePage() {
 }
 
 function ProfileContent() {
-  const [user, setUser] = useState<{ id: string } | null>(null);
-  const [perfil, setPerfil] = useState<Perfil | null>(null);
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [perfil, setPerfil] = useState<any>(null);
   const [nombre, setNombre] = useState('');
   const [ciudad, setCiudad] = useState('');
   const [telefono, setTelefono] = useState<string | undefined>();
@@ -34,7 +28,7 @@ function ProfileContent() {
   useEffect(() => {
     const getUserAndProfile = async () => {
       const { data } = await supabase.auth.getUser();
-      setUser(data.user ? { id: data.user.id } : null);
+      setUser(data.user);
 
       const { data: perfilData } = await supabase
         .from("profiles")
@@ -43,10 +37,10 @@ function ProfileContent() {
         .single();
 
       if (perfilData) {
-        setPerfil(perfilData as Perfil);
+        setPerfil(perfilData);
         setNombre(perfilData.nombre);
-        setCiudad(perfilData.ciudad ?? '');
-        setTelefono(perfilData.telefono ?? undefined);
+        setCiudad(perfilData.ciudad);
+        setTelefono(perfilData.telefono);
       }
     };
 
