@@ -4,10 +4,20 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
+type Perfil = {
+  id: string;
+  user_id: string;
+  nombre: string;
+  email?: string | null;
+  ciudad?: string | null;
+  estado: "activo" | "inactivo";
+  rol?: string | null;
+};
+
 export default function AdminPage() {
-  const [jugadores, setJugadores] = useState<any[]>([]);
+  const [jugadores, setJugadores] = useState<Perfil[]>([]);
   const [busqueda, setBusqueda] = useState("");
-  const [jugadorSeleccionado, setJugadorSeleccionado] = useState<any>(null);
+  const [jugadorSeleccionado, setJugadorSeleccionado] = useState<Perfil | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -31,22 +41,21 @@ export default function AdminPage() {
         return;
       }
 
-      // Si es admin, cargar jugadores
       const { data } = await supabase.from("profiles").select("*").order("nombre");
-      setJugadores(data || []);
+      setJugadores((data ?? []) as Perfil[]);
       setLoading(false);
     };
 
     verificarAdmin();
   }, [router]);
 
-  const cambiarEstado = async (jugador: any) => {
+  const cambiarEstado = async (jugador: Perfil) => {
     const nuevoEstado = jugador.estado === "activo" ? "inactivo" : "activo";
 
     await supabase.from("profiles").update({ estado: nuevoEstado }).eq("id", jugador.id);
-    
+
     const { data } = await supabase.from("profiles").select("*").order("nombre");
-    setJugadores(data || []);
+    setJugadores((data ?? []) as Perfil[]);
     setJugadorSeleccionado(null);
   };
 

@@ -39,7 +39,7 @@ async function redistribuirEquipos() {
     }
 }
 
-function asignarEquipo(reservas: any[]): Equipo {
+function asignarEquipo(reservas: Reserva[]): Equipo {
     const equiposDisponibles: Equipo[] = ["Rojo", "Azul"];
     const totalJugadores = reservas.length;
 
@@ -85,10 +85,26 @@ export default function DashboardPage() {
     );
 }
 
+type Perfil = {
+    id: string;
+    user_id: string;
+    nombre: string;
+    estado: string;
+    rol?: string | null;
+  };
+  
+  type Reserva = {
+    id: number;
+    user_id: string;
+    nombre_jugador?: string | null;
+    equipo: string;
+    reservado_en: string;
+  };
+
 function DashboardContent() {
-    const [user, setUser] = useState<any>(null);
-    const [perfil, setPerfil] = useState<any>(null);
-    const [reservas, setReservas] = useState<any[]>([]);
+    const [user, setUser] = useState<{ id: string } | null>(null);
+    const [perfil, setPerfil] = useState<Perfil | null>(null);
+    const [reservas, setReservas] = useState<Reserva[]>([]);
     const [miEquipo, setMiEquipo] = useState<Equipo>("Sin equipo");
     const [showInactivoModal, setShowInactivoModal] = useState(false);
     const [ultimoJugador, setUltimoJugador] = useState<string | null>(null);

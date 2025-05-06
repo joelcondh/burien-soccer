@@ -4,17 +4,24 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
+type Perfil = {
+  id: string;
+  user_id: string;
+  nombre: string;
+  rol?: string | null;
+};
+
 export default function HomePage() {
-  const [user, setUser] = useState<any>(null);
-  const [perfil, setPerfil] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+  const [perfil, setPerfil] = useState<Perfil | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const getUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
 
       if (data?.user) {
-        setUser(data.user);
+        setUser({ id: data.user.id, email: data.user.email! });
 
         const { data: perfilData } = await supabase
           .from("profiles")
@@ -22,7 +29,7 @@ export default function HomePage() {
           .eq("user_id", data.user.id)
           .single();
 
-        setPerfil(perfilData);
+        setPerfil(perfilData as Perfil);
       }
     };
 
